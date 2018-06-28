@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity(name = "TranslationalSubtitle")
 @DiscriminatorValue("translational")
-public class TranslationalSubtitle {
+public class TranslationalSubtitle extends Subtitle{
 
   @OneToMany(mappedBy = "subtitle")
   private List<SubtitleLine> translatedLines;
