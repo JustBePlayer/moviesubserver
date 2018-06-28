@@ -1,6 +1,7 @@
 package com.ado.moviesub.server.app.facade;
 
 import com.ado.moviesub.server.app.api.UserAPI;
+import com.ado.moviesub.server.app.entity.movie.Movie;
 import com.ado.moviesub.server.app.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,5 +27,9 @@ public class DefaultMovieManagementFacade implements MovieManagementFacade {
   @Override
   public List<User> getUsers() {
     return userAPI.getUsers();
+  }
+
+  @Override public List<Movie> getMovies() {
+    return null;
   }
 }

@@ -1,5 +1,6 @@
 package com.ado.moviesub.server.app.facade;
 
+import com.ado.moviesub.server.app.entity.movie.Movie;
 import com.ado.moviesub.server.app.entity.user.User;
 
 import java.util.List;
@@ -10,4 +11,6 @@ public interface MovieManagementFacade {
   void removeUser(User user);
 
   List<User> getUsers();
+
+  List<Movie> getMovies();
 }

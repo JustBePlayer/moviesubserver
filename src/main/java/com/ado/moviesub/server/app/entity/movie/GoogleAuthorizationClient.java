@@ -18,7 +18,7 @@ import java.util.List;
 
 public class GoogleAuthorizationClient {
   private static final String CREDENTIALS_FOLDER = "credentials";
-  private static final String CLIENT_SECRET_DIR = "/client_secret_948769191914-erne7pt03hqfde2cu7oai9oqthdhr64r.apps.googleusercontent.com.json";
+  private static final String CLIENT_SECRET_DIR = "/client_secret_269598986692-bgbqa4c0debulnafgfls3du889ss9uuj.apps.googleusercontent.com.json";
 
   private final JsonFactory jsonFactory;
 

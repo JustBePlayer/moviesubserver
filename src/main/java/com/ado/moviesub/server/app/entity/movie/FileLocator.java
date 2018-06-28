@@ -9,4 +9,6 @@ public interface FileLocator {
   File locate(String fileName);
 
   List<File> getFiles() throws GeneralSecurityException, IOException;
+
+  List<String> getFileNames() throws IOException, GoogleDriveLocatorException;
 }

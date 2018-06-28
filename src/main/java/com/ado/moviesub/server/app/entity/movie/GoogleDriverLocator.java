@@ -15,14 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleDriverLocator implements FileLocator {
+  private static final String ROOT_DIRECTORY_NAME = "Subtitles";
 
-  private GoogleAuthorizationClient authClient;
-  private JsonFactory jsonFactory;
+  private Drive driveService;
 
-  public GoogleDriverLocator(){
-    this.jsonFactory = JacksonFactory.getDefaultInstance();
-    this.authClient = new GoogleAuthorizationClient(jsonFactory);
+  private GoogleDriverLocator(Drive driveService){
+    this.driveService = driveService;
   }
+
 
   @Override
   public File locate(String fileName) {
@@ -31,15 +31,7 @@ public class GoogleDriverLocator implements FileLocator {
 
   @Override
   public List<File> getFiles() throws GeneralSecurityException, IOException {
-    NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
-    Credential credentials = authClient.getCredentials(httpTransport);
-    Drive driveService = new Drive.Builder(httpTransport, jsonFactory, credentials)
-        .setApplicationName("MovieSub")
-        .build();
-
     FileList result = driveService.files().list()
-        .setPageSize(10)
         .setFields("nextPageToken, files(id, name)")
         .execute();
 
@@ -49,4 +41,52 @@ public class GoogleDriverLocator implements FileLocator {
 
     return new ArrayList<>();
   }
+
+  @Override
+  public List<String> getFileNames() throws IOException, GoogleDriveLocatorException {
+
+    List<String> fileNames = new ArrayList<>();
+    String pageToken = null;
+    do{
+      FileList result = driveService.files().list()
+          .setQ(String.format("'%s' in parents", getRootDirectoryId()))
+          .setFields("nextPageToken, files(id, name)")
+          .setPageToken(pageToken)
+          .execute();
+
+      result.getFiles().forEach(file -> fileNames.add(file.getName()));
+    } while (pageToken != null);
+
+    return fileNames;
+  }
+
+  public static GoogleDriverLocator connect() throws GeneralSecurityException, IOException {
+    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    GoogleAuthorizationClient authClient = new GoogleAuthorizationClient(jsonFactory);
+
+    NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+    Credential credentials = authClient.getCredentials(httpTransport);
+
+    Drive driveService = new Drive.Builder(httpTransport, jsonFactory, credentials)
+        .setApplicationName("movie-sub-server")
+        .build();
+
+    return new GoogleDriverLocator(driveService);
+  }
+
+  private String getRootDirectoryId() throws IOException, GoogleDriveLocatorException {
+    FileList fileList = driveService.files()
+        .list()
+        .setQ(String.format("title='%'", ROOT_DIRECTORY_NAME))
+        .execute();
+
+    if(fileList.isEmpty()){
+      throw new GoogleDriveLocatorException("Root Directory Could not be retrieved");
+    }
+
+    return fileList.getFiles().get(0).getId();
+  }
+
+
+
 }
