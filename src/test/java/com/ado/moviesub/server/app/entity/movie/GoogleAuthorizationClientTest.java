@@ -20,7 +20,7 @@ public class GoogleAuthorizationClientTest {
 
   @Test
   public void test() throws GeneralSecurityException, IOException {
-    GoogleDriverLocator locator = new GoogleDriverLocator();
+    GoogleDriverLocator locator = GoogleDriverLocator.connect();
     locator.getFiles();
   }
 }
