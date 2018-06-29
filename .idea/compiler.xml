@@ -6,10 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="moviesubserver" />
+        <module name="application" />
+        <module name="integration-tests" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="application" target="1.8" />
+      <module name="integration-tests" target="1.8" />
       <module name="moviesubserver" target="1.8" />
     </bytecodeTargetLevel>
   </component>
