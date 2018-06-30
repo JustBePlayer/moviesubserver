@@ -1,5 +1,6 @@
 package com.ado.moviesub.app.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -15,7 +16,8 @@ public class User {
 
   }
   // @formatter:off
-  private User(
+  @JsonCreator
+  public User(
       @JsonProperty("id") Long id,
       @JsonProperty(value = "userName", required = true) @NotBlank String userName,
       @JsonProperty("age") Integer age,
@@ -45,7 +47,7 @@ public class User {
   private Long id;
 
   @NotBlank
-  @Column(name = "userName")
+  @Column(name = "userName", unique = true)
   private String userName;
 
   @Column(name = "age")

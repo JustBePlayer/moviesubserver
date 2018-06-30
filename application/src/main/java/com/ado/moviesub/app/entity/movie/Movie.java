@@ -1,9 +1,12 @@
 package com.ado.moviesub.app.entity.movie;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -12,9 +15,9 @@ public class Movie {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private Long id;
 
-  @Column(name = "name")
+  @Column(name = "name", unique = true)
   private String name;
 
   @Column(name = "duration")
@@ -38,8 +41,12 @@ public class Movie {
 
   }
 
-  private Movie(@JsonProperty("id") Integer id, @JsonProperty("name") String name, @JsonProperty("duration") Duration duration,
+  @JsonCreator
+  private Movie(@JsonProperty("id") Long id, @JsonProperty("name") String name, @JsonProperty("duration") Duration duration,
       @JsonProperty("description") String description) {
+    this.genres = new HashSet<>();
+    this.subtitles = new HashSet<>();
+
     this.id = id;
     this.name = name;
     this.duration = duration;
@@ -53,7 +60,7 @@ public class Movie {
     this.duration = builder.duration;
   }
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
@@ -77,13 +84,27 @@ public class Movie {
     return subtitles;
   }
 
+  @Override public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    Movie movie = (Movie) o;
+    return Objects.equals(id, movie.id) && Objects.equals(name, movie.name) && Objects.equals(duration, movie.duration) && Objects
+        .equals(description, movie.description) && Objects.equals(genres, movie.genres) && Objects.equals(subtitles, movie.subtitles);
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash(id, name, duration, description, genres, subtitles);
+  }
+
   public static class Builder{
-    private Integer id;
+    private Long id;
     private String name;
     private Duration duration;
     private String description;
 
-    public Builder setId(Integer id) {
+    public Builder setId(Long id) {
       this.id = id;
       return this;
     }
