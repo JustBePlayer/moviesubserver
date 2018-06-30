@@ -1,5 +1,9 @@
 package com.ado.moviesub.app.facade;
 
-public interface MovieManagementFacade extends UserCRUD, MovieCRUD {
+import com.ado.moviesub.app.entity.movie.Subtitle;
 
+import java.util.List;
+
+public interface MovieManagementFacade extends UserCRUD, MovieCRUD {
+  public List<Subtitle> getSubtitles();
 }

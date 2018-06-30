@@ -1,23 +1,25 @@
 package com.ado.moviesub.app.entity.movie;
 
+import com.ado.moviesub.app.exception.InternalServiceException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoogleDriverLocator implements FileLocator {
+public class GoogleDriverLocator implements SubtitleLocator {
   private static final String ROOT_DIRECTORY_NAME = "Subtitles";
 
   private Drive driveService;
+  private String rootDirectoryId;
 
   private GoogleDriverLocator(Drive driveService){
     this.driveService = driveService;
@@ -25,39 +27,35 @@ public class GoogleDriverLocator implements FileLocator {
 
 
   @Override
-  public File locate(String fileName) {
+  public Subtitle locate(String fileName) {
     return null;
   }
 
   @Override
-  public List<File> getFiles() throws GeneralSecurityException, IOException {
-    FileList result = driveService.files().list()
-        .setFields("nextPageToken, files(id, name)")
-        .execute();
+  public List<Subtitle> getAllSubtitles() {
+   List<Subtitle> subtitles = new ArrayList<>();
+   try {
+     Drive.Files.List request = createGetAllSubtitlesRequest();
 
-    List<File> results = new ArrayList<>();
+     do {
+       FileList result = request.execute();;
 
-//    File file = driveService.files()
+       for(File file : result.getFiles()){
+         subtitles.add(convertSubtitle(file));
+       }
+       request.setPageToken(result.getNextPageToken());
 
-    return new ArrayList<>();
+     } while (request.getPageToken() != null && request.getPageToken().length() > 0);
+
+     return subtitles;
+   } catch (GoogleDriveLocatorException | IOException e) {
+     throw new InternalServiceException("Something went wrong when fetching subtitles form server");
+   }
   }
 
   @Override
-  public List<String> getFileNames() throws IOException, GoogleDriveLocatorException {
-
-    List<String> fileNames = new ArrayList<>();
-    String pageToken = null;
-    do{
-      FileList result = driveService.files().list()
-          .setQ(String.format("'%s' in parents", getRootDirectoryId()))
-          .setFields("nextPageToken, files(id, name)")
-          .setPageToken(pageToken)
-          .execute();
-
-      result.getFiles().forEach(file -> fileNames.add(file.getName()));
-    } while (pageToken != null);
-
-    return fileNames;
+  public List<Subtitle> getSubtitlesByMovieName(String movieName) {
+    return null;
   }
 
   public static GoogleDriverLocator connect() throws GeneralSecurityException, IOException {
@@ -75,18 +73,47 @@ public class GoogleDriverLocator implements FileLocator {
   }
 
   private String getRootDirectoryId() throws IOException, GoogleDriveLocatorException {
+    if(rootDirectoryId != null){
+      return rootDirectoryId;
+    }
+
     FileList fileList = driveService.files()
         .list()
-        .setQ(String.format("title='%'", ROOT_DIRECTORY_NAME))
+        .setQ(String.format("name='%s'", ROOT_DIRECTORY_NAME))
         .execute();
 
     if(fileList.isEmpty()){
       throw new GoogleDriveLocatorException("Root Directory Could not be retrieved");
     }
 
-    return fileList.getFiles().get(0).getId();
+    rootDirectoryId = fileList.getFiles().get(0).getId();
+    return rootDirectoryId;
   }
 
+  private Drive.Files.List createGetAllSubtitlesRequest() throws IOException, GoogleDriveLocatorException {
+    String pageToken = null;
 
+    // @formatter:ff
+    return driveService.files().list()
+        .setQ(String.format("'%s' in parents", getRootDirectoryId()))
+        .setFields("nextPageToken, files(id, name)")
+        .setPageToken(pageToken);
+
+    // @formatter:on
+  }
+
+  private Subtitle convertSubtitle(File file) throws IOException {
+    try(SubtitleParser parser = new SubtitleParser(downloadFile(file), file.getName())){
+      return parser.parse();
+    }
+  }
+
+  private BufferedReader downloadFile(File file) throws IOException {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()){
+      driveService.files().get(file.getId()).executeMediaAndDownloadTo(out);
+
+      return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
+    }
+  }
 
 }

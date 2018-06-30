@@ -31,6 +31,14 @@ public class SubtitleLine {
   @JoinColumn(name = "sub_id")
   private Subtitle subtitle;
 
+  public SubtitleLine(Builder builder) {
+    this.id = builder.id;
+    this.sequenceNumber = builder.sequenceNumber;
+    this.startTime = builder.startTime;
+    this.endTime = builder.endTime;
+    this.text = builder.text;
+  }
+
   public Subtitle getSubtitle() {
     return subtitle;
   }
@@ -53,5 +61,42 @@ public class SubtitleLine {
 
   public String getText() {
     return text;
+  }
+
+  public static class Builder{
+    private Long id;
+    private int sequenceNumber;
+    private Duration startTime;
+    private Duration endTime;
+    private String text;
+
+    public Builder setId(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder setSequenceNumber(int sequenceNumber) {
+      this.sequenceNumber = sequenceNumber;
+      return this;
+    }
+
+    public Builder setStartTime(Duration startTime) {
+      this.startTime = startTime;
+      return this;
+    }
+
+    public Builder setEndTime(Duration endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
+    public Builder setText(String text) {
+      this.text = text;
+      return this;
+    }
+
+    public SubtitleLine build(){
+      return new SubtitleLine(this);
+    }
   }
 }

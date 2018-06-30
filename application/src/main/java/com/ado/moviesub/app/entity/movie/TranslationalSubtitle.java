@@ -12,6 +12,8 @@ public class TranslationalSubtitle extends Subtitle{
   @OneToMany(mappedBy = "subtitle")
   private List<SubtitleLine> translatedLines;
 
-
+  public TranslationalSubtitle(Builder builder) {
+    super(builder);
+  }
 }
 
