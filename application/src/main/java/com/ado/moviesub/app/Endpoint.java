@@ -14,4 +14,8 @@ public enum Endpoint {
   public String toEndpointPath(){
     return String.format("%s/%s", URL_DELIMITER, name);
   }
+
+  public String toEndpointPath(Long id){
+    return toEndpointPath().concat(URL_DELIMITER).concat(id.toString());
+  }
 }
