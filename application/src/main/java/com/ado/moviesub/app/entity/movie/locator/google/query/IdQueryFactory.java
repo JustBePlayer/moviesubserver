@@ -1,4 +1,4 @@
-package com.ado.moviesub.app.entity.movie.locator.google;
+package com.ado.moviesub.app.entity.movie.locator.google.query;
 
 import com.ado.moviesub.app.entity.movie.locator.google.query.AttributeQuery;
 import com.ado.moviesub.app.entity.movie.locator.google.query.AttributeQueryFactory;
