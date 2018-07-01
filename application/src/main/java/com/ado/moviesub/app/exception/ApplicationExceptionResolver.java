@@ -29,14 +29,9 @@ public class ApplicationExceptionResolver extends ResponseEntityExceptionHandler
     return createResponseBody(error);
   }
 
-  @ExceptionHandler(InternalServiceException.class)
-  protected ResponseEntity<ApplicationError> handleInternalServerError(InternalServiceException ex){
+  @ExceptionHandler(ApplicationException.class)
+  protected ResponseEntity<ApplicationError> handleApplicationException(ApplicationException ex){
    return createResponseBody(ex.toApplicationError());
-  }
-
-  @ExceptionHandler(ResourceNotFoundException.class)
-  protected ResponseEntity<ApplicationError> handleResourceNotFoundException(ResourceNotFoundException ex){
-    return createResponseBody(ex.toApplicationError());
   }
 
   @ExceptionHandler(RuntimeException.class)

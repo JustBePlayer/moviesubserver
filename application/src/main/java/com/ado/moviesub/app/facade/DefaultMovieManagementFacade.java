@@ -5,6 +5,7 @@ import com.ado.moviesub.app.api.SubtitleAPI;
 import com.ado.moviesub.app.api.UserAPI;
 import com.ado.moviesub.app.entity.movie.Movie;
 import com.ado.moviesub.app.entity.movie.Subtitle;
+import com.ado.moviesub.app.entity.movie.locator.SubtitleContent;
 import com.ado.moviesub.app.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,5 +85,15 @@ public class DefaultMovieManagementFacade implements MovieManagementFacade {
   public List<Subtitle> getReadyMovieSubtitles(Long movieId) {
     Movie movie = getMovie(movieId);
     return subtitleAPI.getTranslatedSubtitles(movie.getName());
+  }
+
+  @Override
+  public Subtitle getTranslatedSubtitle(String id) {
+    return subtitleAPI.getTranslatedSubtitle(id);
+  }
+
+  @Override
+  public Subtitle getTranslatedSubtitleWithContent(String id) {
+    return subtitleAPI.downloadSubtitle(id);
   }
 }

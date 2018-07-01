@@ -7,10 +7,6 @@ import java.time.Duration;
 @Table(name = "subtitle_line")
 public class SubtitleLine {
 
-  protected SubtitleLine(){
-
-  }
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -30,6 +26,10 @@ public class SubtitleLine {
   @ManyToOne
   @JoinColumn(name = "sub_id")
   private Subtitle subtitle;
+
+  protected SubtitleLine(){
+
+  }
 
   public SubtitleLine(Builder builder) {
     this.id = builder.id;
