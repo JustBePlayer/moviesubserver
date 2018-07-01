@@ -1,4 +1,4 @@
-package com.ado.moviesub.app.entity.movie.locator.google;
+package com.ado.moviesub.app.entity.movie.locator.google.query;
 
 public abstract class AbstractAttributeQueryFactory {
 

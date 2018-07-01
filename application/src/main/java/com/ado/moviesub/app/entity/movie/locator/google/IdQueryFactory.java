@@ -1,5 +1,8 @@
 package com.ado.moviesub.app.entity.movie.locator.google;
 
+import com.ado.moviesub.app.entity.movie.locator.google.query.AttributeQuery;
+import com.ado.moviesub.app.entity.movie.locator.google.query.AttributeQueryFactory;
+
 public class IdQueryFactory extends AttributeQueryFactory {
 
   public IdQueryFactory(Object value) {
