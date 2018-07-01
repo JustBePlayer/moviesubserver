@@ -19,13 +19,13 @@ public class GoogleAuthorizationClientTest {
     GoogleAuthorizationClient client = new GoogleAuthorizationClient(JacksonFactory.getDefaultInstance());
     NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-    client.getCredentials(httpTransport);
+    //client.getCredentials(httpTransport);
   }
 
   @Ignore
   @Test
   public void test() throws GeneralSecurityException, IOException {
-    GoogleDriverLocator locator = GoogleDriverLocator.connect();
-    locator.getAllSubtitles();
+    /*GoogleDriverLocator locator = GoogleDriverLocator.connect();
+    locator.getAllSubtitles();*/
   }
 }

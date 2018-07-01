@@ -8,4 +8,8 @@ public interface MovieManagementFacade extends UserCRUD, MovieCRUD {
   List<Subtitle> getSubtitles();
 
   List<Subtitle> getReadyMovieSubtitles(Long movieId);
+
+  Subtitle getTranslatedSubtitle(String id);
+
+  Subtitle getTranslatedSubtitleWithContent(String id);
 }

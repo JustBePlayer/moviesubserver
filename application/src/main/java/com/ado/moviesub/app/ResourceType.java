@@ -2,7 +2,8 @@ package com.ado.moviesub.app;
 
 public enum ResourceType {
   USER("User"),
-  MOVIE ("Movie");
+  MOVIE ("Movie"),
+  SUBTITLE("Subtitle");
 
   private String name;
 

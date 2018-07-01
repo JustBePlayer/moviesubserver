@@ -2,7 +2,7 @@ package com.ado.moviesub.app.exception;
 
 import com.ado.moviesub.app.ResourceType;
 
-public class ResourceNotFoundException extends RuntimeException{
+public class ResourceNotFoundException extends ApplicationException{
 
   /**
 	 * 
@@ -26,11 +26,12 @@ private static final String MESSAGE = "Resource was not found";
     return new ResourceNotFoundException(ResourceType.MOVIE, resourceId);
   }
 
+  @Override
   public ResourceNotFoundApplicationError toApplicationError(){
     return getApplicationErrorBuilder().build();
   }
 
-
+  @Override
   public ResourceNotFoundApplicationError.Builder getApplicationErrorBuilder(){
     // @formatter:off
     return new ResourceNotFoundApplicationError.Builder()

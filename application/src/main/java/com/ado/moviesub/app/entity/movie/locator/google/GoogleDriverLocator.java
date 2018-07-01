@@ -1,37 +1,39 @@
 package com.ado.moviesub.app.entity.movie.locator.google;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.ado.moviesub.app.entity.movie.Subtitle;
-import com.ado.moviesub.app.entity.movie.SubtitleParser;
+import com.ado.moviesub.app.entity.movie.locator.SubtitleContent;
 import com.ado.moviesub.app.entity.movie.locator.SubtitleLocator;
 import com.ado.moviesub.app.entity.movie.locator.google.query.AttributeQuery;
 import com.ado.moviesub.app.entity.movie.locator.google.query.GoogleDriveFileQuery;
 import com.ado.moviesub.app.entity.movie.locator.google.query.NameQueryFactory;
 import com.ado.moviesub.app.entity.movie.locator.google.query.ParentAttributeQueryFactory;
 import com.ado.moviesub.app.exception.InternalServiceException;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.ado.moviesub.app.exception.SubtitleFileNotFoundException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import java.io.*;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
-
+@Service("Google")
 public class GoogleDriverLocator implements SubtitleLocator {
   private static final String ROOT_DIRECTORY_NAME = "Subtitles";
+  private static final String ERROR_MESSAGE = "Something went wrong when fetching subtitles form server";
 
-  private Drive driveService;
   private String rootDirectoryId;
 
-  private GoogleDriverLocator(Drive driveService){
-    this.driveService = driveService;
-  }
-
+  @Autowired
+  private DriveServiceProvider driveServiceProvider;
 
   @Override
   public Subtitle locate(String fileName) {
@@ -39,18 +41,18 @@ public class GoogleDriverLocator implements SubtitleLocator {
   }
 
   @Override
-  public List<Subtitle> getAllSubtitles() {
+  public List<SubtitleContent> getAllSubtitles() {
    try {
      Drive.Files.List request = createGetAllSubtitlesRequest();
 
      return getSubtitles(request);
-   } catch (GoogleDriveLocatorException | IOException e) {
-     throw new InternalServiceException("Something went wrong when fetching subtitles form server");
+   } catch (GoogleDriveLocatorException | IOException | GeneralSecurityException e) {
+     throw new InternalServiceException(ERROR_MESSAGE);
    }
   }
 
   @Override
-  public List<Subtitle> getSubtitlesByMovieName(String movieName) {
+  public List<SubtitleContent> getSubtitlesByMovieName(String movieName) {
     try {
       Drive.Files.List request = createGetAllSubtitlesRequest();
 
@@ -62,33 +64,46 @@ public class GoogleDriverLocator implements SubtitleLocator {
 
       return getSubtitles(request);
 
-    } catch (GoogleDriveLocatorException | IOException e) {
-      throw new InternalServiceException("Something went wrong when fetching subtitles form server");
+    } catch (GoogleDriveLocatorException | IOException | GeneralSecurityException e) {
+      throw new InternalServiceException(ERROR_MESSAGE);
     }
   }
 
+  @Override
+  public SubtitleContent getSubtitleInfoById(String id) {
+    try {
+      File subtitleFile = driveServiceProvider.getDriveService().files().get(id).execute();
+      return convertSubtitle(subtitleFile).build();
 
-  public static GoogleDriverLocator connect() throws GeneralSecurityException, IOException {
-    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    GoogleAuthorizationClient authClient = new GoogleAuthorizationClient(jsonFactory);
-
-    NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-    Credential credentials = authClient.getCredentials(httpTransport);
-
-    Drive driveService = new Drive.Builder(httpTransport, jsonFactory, credentials)
-        .setApplicationName("movie-sub-server")
-        .build();
-
-    return new GoogleDriverLocator(driveService);
+    } catch (GoogleJsonResponseException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+        throw new SubtitleFileNotFoundException(id);
+      }
+      throw new InternalServiceException(ERROR_MESSAGE);
+    } catch (IOException | GeneralSecurityException e) {
+      throw new InternalServiceException(ERROR_MESSAGE);
+    }
   }
 
-  private List<Subtitle> getSubtitles(Drive.Files.List request) throws IOException {
-    List<Subtitle> subtitles = new ArrayList<>();
+  @Override
+  public SubtitleContent downloadSubtitleFile(String id) {
+
+    try {
+      File subtitleFile = driveServiceProvider.getDriveService().files().get(id).execute();
+      return convertSubtitle(subtitleFile).setFileContent(downloadFile(subtitleFile)).build();
+
+    } catch (IOException | GeneralSecurityException e) {
+      throw new InternalServiceException(ERROR_MESSAGE);
+    }
+  }
+
+  private List<SubtitleContent> getSubtitles(Drive.Files.List request) throws IOException {
+    List<SubtitleContent> subtitles = new ArrayList<>();
     do {
-      FileList result = request.execute();;
+      FileList result = request.execute();
 
       for(File file : result.getFiles()){
-        subtitles.add(convertSubtitle(file));
+        subtitles.add(convertSubtitle(file).build());
       }
       request.setPageToken(result.getNextPageToken());
 
@@ -96,7 +111,8 @@ public class GoogleDriverLocator implements SubtitleLocator {
     return subtitles;
   }
 
-  private String getRootDirectoryId() throws IOException, GoogleDriveLocatorException {
+
+  private String getRootDirectoryId() throws IOException, GoogleDriveLocatorException, GeneralSecurityException {
     if(rootDirectoryId != null){
       return rootDirectoryId;
     }
@@ -104,7 +120,7 @@ public class GoogleDriverLocator implements SubtitleLocator {
     AttributeQuery attributeQuery = new NameQueryFactory(ROOT_DIRECTORY_NAME).equal();
     GoogleDriveFileQuery query = new GoogleDriveFileQuery(attributeQuery);
 
-    FileList fileList = driveService.files()
+    FileList fileList = driveServiceProvider.getDriveService().files()
         .list()
         .setQ(query.toString())
         .execute();
@@ -117,14 +133,14 @@ public class GoogleDriverLocator implements SubtitleLocator {
     return rootDirectoryId;
   }
 
-  private Drive.Files.List createGetAllSubtitlesRequest() throws IOException, GoogleDriveLocatorException {
+  private Drive.Files.List createGetAllSubtitlesRequest() throws IOException, GoogleDriveLocatorException, GeneralSecurityException {
     String pageToken = null;
 
     AttributeQuery attributeQuery = new ParentAttributeQueryFactory(getRootDirectoryId()).in();
     GoogleDriveFileQuery query = new GoogleDriveFileQuery(attributeQuery);
 
     // @formatter:ff
-    return driveService.files().list()
+    return driveServiceProvider.getDriveService().files().list()
         .setQ(query.toString())
         .setFields("nextPageToken, files(id, name)")
         .setPageToken(pageToken);
@@ -132,17 +148,17 @@ public class GoogleDriverLocator implements SubtitleLocator {
     // @formatter:on
   }
 
-  private Subtitle convertSubtitle(File file) throws IOException {
-    try(SubtitleParser parser = new SubtitleParser(downloadFile(file), file.getName())){
-      return parser.parse();
-    }
+  private SubtitleContent.Builder convertSubtitle(File file)  {
+    return new SubtitleContent.Builder().setProviderId(file.getId()).setSubtitleName(file.getName());
   }
 
-  private BufferedReader downloadFile(File file) throws IOException {
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream()){
-      driveService.files().get(file.getId()).executeMediaAndDownloadTo(out);
 
-      return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
+
+  private String downloadFile(File file) throws IOException, GeneralSecurityException {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()){
+      driveServiceProvider.getDriveService().files().get(file.getId()).executeMediaAndDownloadTo(out);
+
+      return new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
   }
 

@@ -1,25 +1,26 @@
 package com.ado.moviesub.app;
 
 import com.ado.moviesub.app.entity.movie.locator.SubtitleLocator;
-import com.ado.moviesub.app.entity.movie.locator.FileLocatorProviderType;
-import com.ado.moviesub.app.entity.movie.locator.google.GoogleDriverLocator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 
 @Configuration
 @EnableJpaAuditing
 @EnableJpaRepositories
 public class AppConfig {
+
+  @Autowired
+  private ApplicationContext context;
 
   @Bean
   public Jackson2ObjectMapperBuilder jacksonBuilder() {
@@ -31,13 +32,8 @@ public class AppConfig {
   }
 
   @Bean("fileLocatorAlias")
-  public SubtitleLocator getSubtitlesFileLocator(@Value("${subtitle.provider}") String qualifier) throws GeneralSecurityException, IOException {
-    switch (FileLocatorProviderType.fromString(qualifier)) {
-      case GOOGLE:
-        return GoogleDriverLocator.connect();
-      default:
-        return null;
-    }
+  public SubtitleLocator getSubtitlesFileLocator(@Value("${subtitle.provider}") String qualifier) {
+    return (SubtitleLocator) context.getBean(qualifier);
   }
 
 }

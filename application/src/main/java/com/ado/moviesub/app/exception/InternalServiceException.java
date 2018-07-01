@@ -1,6 +1,6 @@
 package com.ado.moviesub.app.exception;
 
-public class InternalServiceException extends RuntimeException implements ApplicationErrorTransformer{
+public class InternalServiceException extends ApplicationException {
 
   /**
 	 * 
@@ -20,10 +20,12 @@ public InternalServiceException() {
     super(cause);
   }
 
+  @Override
   public InternalApplicationError toApplicationError(){
     return getApplicationErrorBuilder().build();
   }
 
+  @Override
   public InternalApplicationError.Builder getApplicationErrorBuilder(){
     return new InternalApplicationError.Builder().setMessage(getMessage());
   }

@@ -1,5 +1,6 @@
 package com.ado.moviesub.app.entity.movie;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class Subtitle {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Transient
+  private String providerId;
+
   @Column(name = "version", nullable = false)
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(
@@ -56,12 +60,17 @@ public class Subtitle {
   @JoinColumn(name = "movie_id")
   private Movie movie;
 
+  protected Subtitle(){
+
+  }
+
   public Subtitle(Builder builder) {
     this.id = builder.id;
     this.language = builder.language;
     this.version = builder.version;
     this.lines = builder.lines;
     this.movie = builder.movie;
+    this.providerId = builder.providerId;
   }
 
   public Long getId() {
@@ -80,6 +89,10 @@ public class Subtitle {
     return lines;
   }
 
+  public String getProviderId() {
+    return providerId;
+  }
+
   public static class Builder{
     private Long id;
     private String version;
@@ -87,9 +100,19 @@ public class Subtitle {
     private Language language;
     private List<SubtitleLine> lines;
     private Movie movie;
+    private String providerId;
 
     public Builder (){
       this.lines = new ArrayList<>();
+    }
+
+    public Builder(Subtitle subtitle){
+      this.id = subtitle.id;
+      this.version = subtitle.version;
+      this.language = subtitle.language;
+      this.lines = subtitle.lines;
+      this.movie = subtitle.movie;
+      this.providerId = subtitle.providerId;
     }
 
     public Builder setId(Long id) {
@@ -114,6 +137,11 @@ public class Subtitle {
 
     public Builder setMovie(Movie movie) {
       this.movie = movie;
+      return this;
+    }
+
+    public Builder setProviderId(String providerId){
+      this.providerId = providerId;
       return this;
     }
 

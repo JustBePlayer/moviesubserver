@@ -9,7 +9,11 @@ public interface SubtitleLocator {
 
   Subtitle locate(String fileName);
 
-  List<Subtitle> getAllSubtitles();
+  List<SubtitleContent> getAllSubtitles();
 
-  List<Subtitle> getSubtitlesByMovieName(String movieName);
+  List<SubtitleContent> getSubtitlesByMovieName(String movieName);
+
+  SubtitleContent getSubtitleInfoById(String id);
+
+  SubtitleContent downloadSubtitleFile(String id);
 }
