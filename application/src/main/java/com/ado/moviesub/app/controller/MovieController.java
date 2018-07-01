@@ -2,6 +2,7 @@ package com.ado.moviesub.app.controller;
 
 import java.util.List;
 
+import com.ado.moviesub.app.entity.movie.Subtitle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,4 +46,18 @@ public class MovieController {
     Movie createdMovie = movieManagementFacade.createMovie(movie);
     return ResponseEntity.ok(createdMovie);
   }
+
+  @GetMapping("/subtitles")
+  public ResponseEntity<List<Subtitle>> getTranslatedSubtitles(){
+    List<Subtitle> subtitles = movieManagementFacade.getSubtitles();
+    return ResponseEntity.ok(subtitles);
+  }
+
+  @GetMapping("/{id}/subtitles/translated")
+  public ResponseEntity<List<Subtitle>> getTranslatedSubtitles(@PathVariable("id") Long id){
+    List<Subtitle> subtitles = movieManagementFacade.getReadyMovieSubtitles(id);
+    return ResponseEntity.ok(subtitles);
+  }
+
+
 }

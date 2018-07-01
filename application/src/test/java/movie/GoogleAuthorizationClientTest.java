@@ -1,10 +1,11 @@
 package movie;
 
-import com.ado.moviesub.app.entity.movie.GoogleAuthorizationClient;
-import com.ado.moviesub.app.entity.movie.GoogleDriverLocator;
+import com.ado.moviesub.app.entity.movie.locator.google.GoogleAuthorizationClient;
+import com.ado.moviesub.app.entity.movie.locator.google.GoogleDriverLocator;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.security.GeneralSecurityException;
 
 public class GoogleAuthorizationClientTest {
 
+  @Ignore
   @Test
   public void testGetCredentials() throws GeneralSecurityException, IOException {
     GoogleAuthorizationClient client = new GoogleAuthorizationClient(JacksonFactory.getDefaultInstance());
@@ -20,9 +22,10 @@ public class GoogleAuthorizationClientTest {
     client.getCredentials(httpTransport);
   }
 
+  @Ignore
   @Test
   public void test() throws GeneralSecurityException, IOException {
     GoogleDriverLocator locator = GoogleDriverLocator.connect();
-    locator.getFiles();
+    locator.getAllSubtitles();
   }
 }

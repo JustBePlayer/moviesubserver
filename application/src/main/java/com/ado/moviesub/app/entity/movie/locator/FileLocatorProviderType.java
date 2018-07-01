@@ -1,9 +1,9 @@
-package com.ado.moviesub.app.entity.movie;
+package com.ado.moviesub.app.entity.movie.locator;
 
 import java.util.Arrays;
 
 public enum FileLocatorProviderType {
-  GOOGLE("Super");
+  GOOGLE("Google");
 
   private final String value;
 
@@ -13,7 +13,7 @@ public enum FileLocatorProviderType {
 
   public static FileLocatorProviderType fromString(String providerName) throws IllegalArgumentException {
     return Arrays.stream(FileLocatorProviderType.values())
-        .filter(v -> v.value.equals(providerName))
+        .filter(v -> v.value.equalsIgnoreCase(providerName))
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Unknown provider: ".concat(providerName)));
   }

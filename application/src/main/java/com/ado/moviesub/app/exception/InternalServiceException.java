@@ -2,7 +2,12 @@ package com.ado.moviesub.app.exception;
 
 public class InternalServiceException extends RuntimeException implements ApplicationErrorTransformer{
 
-  public InternalServiceException() {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4226536744594404023L;
+
+public InternalServiceException() {
     super();
   }
   public InternalServiceException(String message, Throwable cause) {
