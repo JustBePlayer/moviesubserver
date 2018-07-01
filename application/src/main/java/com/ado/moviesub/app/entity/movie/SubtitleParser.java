@@ -9,8 +9,8 @@ public class SubtitleParser implements AutoCloseable{
 
   public static final String DEFAULT_VERSION = "00000000-0000-0000-0000-000000000000";
 
-  private static final int MOVIE_NAME_INDEX = 0;
-  private static final int LANGUAGE_INDEX = 1;
+  private static final int LANGUAGE_INDEX = 0;
+  private static final int MOVIE_NAME_INDEX = 1;
   private static final int VERSION_INDEX = 2;
 
   private static final String NAME_TOKENS_DELIMITER = "-";
@@ -43,7 +43,6 @@ public class SubtitleParser implements AutoCloseable{
   }
 
   private List<SubtitleLine> getSubtitleLines() throws IOException {
-    SubtitleLineParser parser = new SubtitleLineParser();
     List<SubtitleLine> subtitleLines = new ArrayList<>();
 
       String line;
@@ -52,8 +51,8 @@ public class SubtitleParser implements AutoCloseable{
       while ((line = fileContentReader.readLine()) != null){
         String normalizedLine = line.trim();
 
-        if(!normalizedLine.isEmpty()){
-          subtitleLines.add(parser.parse(lineChunks));
+        if(normalizedLine.isEmpty()){
+          subtitleLines.add(lineParser.parse(lineChunks));
           lineChunks.clear();
           continue;
         }

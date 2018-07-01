@@ -1,7 +1,7 @@
 package movie;
 
-import com.ado.moviesub.app.entity.movie.GoogleAuthorizationClient;
-import com.ado.moviesub.app.entity.movie.GoogleDriverLocator;
+import com.ado.moviesub.app.entity.movie.locator.google.GoogleAuthorizationClient;
+import com.ado.moviesub.app.entity.movie.locator.google.GoogleDriverLocator;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;

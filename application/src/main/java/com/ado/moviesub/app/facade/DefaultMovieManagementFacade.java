@@ -79,4 +79,10 @@ public class DefaultMovieManagementFacade implements MovieManagementFacade {
   public List<Subtitle> getSubtitles() {
     return subtitleAPI.getTranslatedSubtitles();
   }
+
+  @Override
+  public List<Subtitle> getReadyMovieSubtitles(Long movieId) {
+    Movie movie = getMovie(movieId);
+    return subtitleAPI.getTranslatedSubtitles(movie.getName());
+  }
 }

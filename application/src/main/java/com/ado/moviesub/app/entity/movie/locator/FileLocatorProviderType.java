@@ -1,4 +1,4 @@
-package com.ado.moviesub.app.entity.movie;
+package com.ado.moviesub.app.entity.movie.locator;
 
 import java.util.Arrays;
 

@@ -52,4 +52,12 @@ public class MovieController {
     List<Subtitle> subtitles = movieManagementFacade.getSubtitles();
     return ResponseEntity.ok(subtitles);
   }
+
+  @GetMapping("/{id}/subtitles/translated")
+  public ResponseEntity<List<Subtitle>> getTranslatedSubtitles(@PathVariable("id") Long id){
+    List<Subtitle> subtitles = movieManagementFacade.getReadyMovieSubtitles(id);
+    return ResponseEntity.ok(subtitles);
+  }
+
+
 }

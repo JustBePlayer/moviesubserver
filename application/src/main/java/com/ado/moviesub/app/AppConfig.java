@@ -1,8 +1,8 @@
 package com.ado.moviesub.app;
 
-import com.ado.moviesub.app.entity.movie.SubtitleLocator;
-import com.ado.moviesub.app.entity.movie.FileLocatorProviderType;
-import com.ado.moviesub.app.entity.movie.GoogleDriverLocator;
+import com.ado.moviesub.app.entity.movie.locator.SubtitleLocator;
+import com.ado.moviesub.app.entity.movie.locator.FileLocatorProviderType;
+import com.ado.moviesub.app.entity.movie.locator.google.GoogleDriverLocator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;

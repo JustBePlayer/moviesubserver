@@ -4,7 +4,11 @@ import com.ado.moviesub.app.ResourceType;
 
 public class ResourceNotFoundException extends RuntimeException{
 
-  private static final String MESSAGE = "Resource was not found";
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7206003987078972539L;
+private static final String MESSAGE = "Resource was not found";
   private Long resourceId;
   private ResourceType resourceType;
 

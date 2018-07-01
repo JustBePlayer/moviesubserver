@@ -73,7 +73,7 @@ public class SubtitleLineParser {
   private void parseText(List<String> orderedLineChunk, SubtitleLine.Builder subtitleLineBuilder){
     List<String> textChunks = orderedLineChunk.subList(TEXT_INDEX, orderedLineChunk.size());
 
-    String text = orderedLineChunk.stream().collect(Collectors.joining(LINE_SEPARATOR));
+    String text = textChunks.stream().collect(Collectors.joining(LINE_SEPARATOR));
     subtitleLineBuilder.setText(text);
   }
 }

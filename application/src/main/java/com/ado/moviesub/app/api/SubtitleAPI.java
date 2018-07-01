@@ -1,6 +1,6 @@
 package com.ado.moviesub.app.api;
 
-import com.ado.moviesub.app.entity.movie.SubtitleLocator;
+import com.ado.moviesub.app.entity.movie.locator.SubtitleLocator;
 import com.ado.moviesub.app.entity.movie.Subtitle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +16,10 @@ public class SubtitleAPI {
 
   public List<Subtitle> getTranslatedSubtitles(){
     return fileLocator.getAllSubtitles();
+  }
+
+  public List<Subtitle> getTranslatedSubtitles(String movieName){
+    return fileLocator.getSubtitlesByMovieName(movieName);
   }
 
 }

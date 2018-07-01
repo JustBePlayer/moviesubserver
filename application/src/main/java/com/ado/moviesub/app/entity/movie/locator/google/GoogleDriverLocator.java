@@ -1,5 +1,8 @@
-package com.ado.moviesub.app.entity.movie;
+package com.ado.moviesub.app.entity.movie.locator.google;
 
+import com.ado.moviesub.app.entity.movie.Subtitle;
+import com.ado.moviesub.app.entity.movie.SubtitleParser;
+import com.ado.moviesub.app.entity.movie.locator.SubtitleLocator;
 import com.ado.moviesub.app.exception.InternalServiceException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -33,21 +36,10 @@ public class GoogleDriverLocator implements SubtitleLocator {
 
   @Override
   public List<Subtitle> getAllSubtitles() {
-   List<Subtitle> subtitles = new ArrayList<>();
    try {
      Drive.Files.List request = createGetAllSubtitlesRequest();
 
-     do {
-       FileList result = request.execute();;
-
-       for(File file : result.getFiles()){
-         subtitles.add(convertSubtitle(file));
-       }
-       request.setPageToken(result.getNextPageToken());
-
-     } while (request.getPageToken() != null && request.getPageToken().length() > 0);
-
-     return subtitles;
+     return getSubtitles(request);
    } catch (GoogleDriveLocatorException | IOException e) {
      throw new InternalServiceException("Something went wrong when fetching subtitles form server");
    }
@@ -55,8 +47,22 @@ public class GoogleDriverLocator implements SubtitleLocator {
 
   @Override
   public List<Subtitle> getSubtitlesByMovieName(String movieName) {
-    return null;
+    try {
+      Drive.Files.List request = createGetAllSubtitlesRequest();
+
+      AttributeQuery attributeNameQuery = new NameQueryFactory(normalizeMovieNameForSearching(movieName)).contains();
+      AttributeQuery IdInParentsQuery = new ParentAttributeQueryFactory(getRootDirectoryId()).in();
+      GoogleDriveFileQuery generalQuery = new GoogleDriveFileQuery(IdInParentsQuery).and(attributeNameQuery);
+
+      request.setQ(generalQuery.toString());
+
+      return getSubtitles(request);
+
+    } catch (GoogleDriveLocatorException | IOException e) {
+      throw new InternalServiceException("Something went wrong when fetching subtitles form server");
+    }
   }
+
 
   public static GoogleDriverLocator connect() throws GeneralSecurityException, IOException {
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -72,14 +78,31 @@ public class GoogleDriverLocator implements SubtitleLocator {
     return new GoogleDriverLocator(driveService);
   }
 
+  private List<Subtitle> getSubtitles(Drive.Files.List request) throws IOException {
+    List<Subtitle> subtitles = new ArrayList<>();
+    do {
+      FileList result = request.execute();;
+
+      for(File file : result.getFiles()){
+        subtitles.add(convertSubtitle(file));
+      }
+      request.setPageToken(result.getNextPageToken());
+
+    } while (request.getPageToken() != null && request.getPageToken().length() > 0);
+    return subtitles;
+  }
+
   private String getRootDirectoryId() throws IOException, GoogleDriveLocatorException {
     if(rootDirectoryId != null){
       return rootDirectoryId;
     }
 
+    AttributeQuery attributeQuery = new NameQueryFactory(ROOT_DIRECTORY_NAME).equal();
+    GoogleDriveFileQuery query = new GoogleDriveFileQuery(attributeQuery);
+
     FileList fileList = driveService.files()
         .list()
-        .setQ(String.format("name='%s'", ROOT_DIRECTORY_NAME))
+        .setQ(query.toString())
         .execute();
 
     if(fileList.isEmpty()){
@@ -93,9 +116,12 @@ public class GoogleDriverLocator implements SubtitleLocator {
   private Drive.Files.List createGetAllSubtitlesRequest() throws IOException, GoogleDriveLocatorException {
     String pageToken = null;
 
+    AttributeQuery attributeQuery = new ParentAttributeQueryFactory(getRootDirectoryId()).in();
+    GoogleDriveFileQuery query = new GoogleDriveFileQuery(attributeQuery);
+
     // @formatter:ff
     return driveService.files().list()
-        .setQ(String.format("'%s' in parents", getRootDirectoryId()))
+        .setQ(query.toString())
         .setFields("nextPageToken, files(id, name)")
         .setPageToken(pageToken);
 
@@ -114,6 +140,16 @@ public class GoogleDriverLocator implements SubtitleLocator {
 
       return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
     }
+  }
+
+  private String normalizeMovieNameForSearching(String movieName){
+    // @formatter:off
+    return new StringBuilder()
+        .append(FILE_NAME_DELIMITER)
+        .append(movieName)
+        .append(FILE_NAME_DELIMITER)
+        .toString();
+    // @formatter:on
   }
 
 }
